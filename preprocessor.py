@@ -2,14 +2,29 @@ import re
 import pandas as pd
 
 def preprocess(data):
-    pattern = '\d{1,2}/\d{1,2}/\d{2,4},\s\d{1,2}:\d{2}\s-\s'
+    # Support both 24-hour and 12-hour (AM/PM) WhatsApp formats
+    pattern = r'\d{1,2}/\d{1,2}/\d{2,4},\s\d{1,2}:\d{2}(?:\s[APap][Mm])?\s-\s'
 
     messages = re.split(pattern, data)[1:]
     dates = re.findall(pattern, data)
 
     df = pd.DataFrame({'user_message': messages, 'message_date': dates})
-    # convert message_date type
-    df['message_date'] = pd.to_datetime(df['message_date'], format='%d/%m/%y, %H:%M - ')
+    # Ensure string & remove trailing " - "
+    df['message_date'] = (
+        df['message_date']
+        .astype(str)
+        .str.replace(' - ', '', regex=False)
+        .str.strip()  # removes extra spaces (important for AM/PM)
+    )
+
+    # Parse both 24-hour and 12-hour (AM/PM) formats
+    df['message_date'] = pd.to_datetime(
+        df['message_date'],
+        dayfirst=True,
+        infer_datetime_format=True,  # helps with AM/PM + mixed formats
+        errors='coerce'
+    )
+
 
     df.rename(columns={'message_date': 'date'}, inplace=True)
 

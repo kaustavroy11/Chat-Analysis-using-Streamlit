@@ -3,6 +3,32 @@ import preprocessor,helper
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+st.markdown("""
+<style>
+.section-gap {
+    margin-top: 60px;   /* controls vertical spacing */
+}         
+.stat-card {
+    background-color: #0e1117;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+.stat-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    min-height: 48px; /* KEY FIX */
+}
+.stat-value {
+    font-size: 36px;
+    font-weight: 800;
+    color: white;
+    margin-top: 10px;
+}
+</style>
+""", unsafe_allow_html=True)
+
 st.sidebar.title("Whatsapp Chat Analyzer")
 
 uploaded_file = st.sidebar.file_uploader("Choose a file")
@@ -13,7 +39,8 @@ if uploaded_file is not None:
 
     # fetch unique users
     user_list = df['user'].unique().tolist()
-    user_list.remove('group_notification')
+    if 'group_notification' in user_list:
+        user_list.remove('group_notification')
     user_list.sort()
     user_list.insert(0,"Overall")
 
@@ -23,23 +50,37 @@ if uploaded_file is not None:
 
         # Stats Area
         num_messages, words, num_media_messages, num_links = helper.fetch_stats(selected_user,df)
+        st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
         st.title("Top Statistics")
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            st.header("Total Messages")
-            st.title(num_messages)
+            st.markdown(f"""
+                <div class="stat-card">
+                    <div class="stat-title">Total Messages</div>
+                    <div class="stat-value">{num_messages}</div>
+                </div>""", unsafe_allow_html=True)
         with col2:
-            st.header("Total Words")
-            st.title(words)
+            st.markdown(f"""
+                <div class="stat-card">
+                    <div class="stat-title">Total Words</div>
+                    <div class="stat-value">{words}</div>
+                </div>""", unsafe_allow_html=True)
         with col3:
-            st.header("Media Shared")
-            st.title(num_media_messages)
+            st.markdown(f"""
+                <div class="stat-card">
+                    <div class="stat-title">Media Shared</div>
+                    <div class="stat-value">{num_media_messages}</div>
+                </div>""", unsafe_allow_html=True)
         with col4:
-            st.header("Links Shared")
-            st.title(num_links)
+            st.markdown(f"""
+                <div class="stat-card">
+                    <div class="stat-title">Links Shared</div>
+                    <div class="stat-value">{num_links}</div>
+                </div>""", unsafe_allow_html=True)
 
         # monthly timeline
+        st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
         st.title("Monthly Timeline")
         timeline = helper.monthly_timeline(selected_user,df)
         fig,ax = plt.subplots()
@@ -48,6 +89,7 @@ if uploaded_file is not None:
         st.pyplot(fig)
 
         # daily timeline
+        st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
         st.title("Daily Timeline")
         daily_timeline = helper.daily_timeline(selected_user, df)
         fig, ax = plt.subplots()
@@ -56,6 +98,7 @@ if uploaded_file is not None:
         st.pyplot(fig)
 
         # activity map
+        st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
         st.title('Activity Map')
         col1,col2 = st.columns(2)
 
@@ -75,6 +118,7 @@ if uploaded_file is not None:
             plt.xticks(rotation='vertical')
             st.pyplot(fig)
 
+        st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
         st.title("Weekly Activity Map")
         user_heatmap = helper.activity_heatmap(selected_user,df)
         fig,ax = plt.subplots()
@@ -83,6 +127,7 @@ if uploaded_file is not None:
 
         # finding the busiest users in the group(Group level)
         if selected_user == 'Overall':
+            st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
             st.title('Most Busy Users')
             x,new_df = helper.most_busy_users(df)
             fig, ax = plt.subplots()
@@ -97,6 +142,7 @@ if uploaded_file is not None:
                 st.dataframe(new_df)
 
         # WordCloud
+        st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
         st.title("Word Cloud")
         df_wc = helper.create_wordcloud(selected_user,df)
         fig,ax = plt.subplots()
@@ -110,7 +156,7 @@ if uploaded_file is not None:
 
         ax.barh(most_common_df[0],most_common_df[1])
         plt.xticks(rotation='vertical')
-
+        st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
         st.title('Most common words')
         st.pyplot(fig)
 
